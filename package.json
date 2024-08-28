@@ -1,0 +1,43 @@
+{
+	"name": "adspower-rabby-login",
+	"version": "1.0.0",
+	"description": "Import Rabby wallets in your ADS Power browsers from xlsx file",
+	"exports": "./index.js",
+	"type": "module",
+	"engines": {
+		"node": ">=18"
+	},
+	"scripts": {
+		"postinstall": "npx playwright install --with-deps chromium",
+		"types-check": "npx tsc -p ./ --noEmit",
+		"lint": "npm run lint:ci --write",
+		"lint:ci": "npx biome check ./",
+		"build": "npx vite build",
+		"start": "npm run types-check && npm run build && node dist",
+		"dev": "nodemon"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"@types/node": "^22.5.0",
+		"nodemon": "^3.1.4",
+		"ts-node": "^10.9.2",
+		"tsx": "^4.19.0",
+		"typescript": "^5.5.4",
+		"vite": "^5.4.2"
+	},
+	"dependencies": {
+		"@inquirer/prompts": "^5.3.8",
+		"axios": "^1.7.5",
+		"axios-rate-limit": "^1.4.0",
+		"ethers": "^6.13.2",
+		"officecrypto-tool": "^0.0.18",
+		"p-map": "^7.0.2",
+		"playwright": "^1.46.1",
+		"winston": "^3.14.2",
+		"winston-daily-rotate-file": "^5.0.0",
+		"xlsx": "^0.18.5"
+	}
+}

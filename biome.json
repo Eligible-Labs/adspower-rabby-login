@@ -1,0 +1,79 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"organizeImports": {
+		"enabled": true
+	},
+	"overrides": [
+		{
+			"include": ["*.vue"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noUnusedImports": { "fix": "none", "level": "info" }
+					}
+				}
+			}
+		}
+	],
+	"javascript": {
+		"globals": ["defineComponent"],
+		"formatter": {
+			"quoteStyle": "single",
+			"trailingCommas": "all",
+			"jsxQuoteStyle": "single",
+			"semicolons": "always",
+			"quoteProperties": "asNeeded",
+			"arrowParentheses": "always",
+			"bracketSpacing": true
+		}
+	},
+	"formatter": {
+		"lineWidth": 135,
+		"enabled": true,
+		"indentStyle": "tab",
+		"indentWidth": 2
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"all": true,
+			"style": {
+				"all": true,
+				"noUnusedTemplateLiteral": { "fix": "unsafe", "level": "error" },
+				"noDefaultExport": "error",
+				"useNamingConvention": "off",
+				"useFilenamingConvention": "off"
+			},
+			"complexity": {
+				"all": true,
+				"noStaticOnlyClass": "off",
+				"noVoid": "off"
+			},
+			"correctness": {
+				"noNodejsModules": "off",
+				"all": true
+			},
+			"nursery": {
+				"all": true,
+				"useImportExtensions": "off",
+				"noExportedImports": "off",
+				"noUndeclaredDependencies": "off"
+			},
+			"a11y": {
+				"all": true
+			},
+			"performance": {
+				"all": true,
+				"noReExportAll": "off"
+			},
+			"security": {
+				"all": true
+			},
+			"suspicious": {
+				"all": true,
+				"noConsoleLog": "error"
+			}
+		},
+		"ignore": ["dist", "node_modules", ".pnpm", ".pnpm-store", "log"]
+	}
+}
