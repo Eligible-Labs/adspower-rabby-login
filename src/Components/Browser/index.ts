@@ -158,6 +158,8 @@ export class Browser {
 
 		logger.info({ code: 'account_process_went_to_page', data: this.logData });
 
+		await page.bringToFront();
+
 		await this.clickByInnerText(page, 'button', 'Next');
 		await this.clickByInnerText(page, 'button', 'Get Started');
 		await this.clickByInnerText(page, 'div', 'Import Private Key');
