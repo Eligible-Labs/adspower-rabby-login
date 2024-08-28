@@ -14,7 +14,7 @@
 		"lint:ci": "npx biome check ./",
 		"build": "npx vite build",
 		"start": "npm run types-check && npm run build && node dist",
-		"dev": "nodemon"
+		"dev": "npx nodemon"
 	},
 	"keywords": [],
 	"author": "",

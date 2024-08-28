@@ -23,7 +23,9 @@ const app = new App({
 	 */
 	concurrency: 'auto',
 	/**
-	 * Google Extension ID
+	 * ID расширения Rabby в браузерe
+	 * Установка https://chromewebstore.google.com/detail/rabby-wallet/acmacodkjbdgmoleebolmdjonilkdbch
+	 * ID в таком случае будет: acmacodkjbdgmoleebolmdjonilkdbch
 	 */
 	chrome_extension_id: 'bgffghflpnclmknlifjfondjbbclhgdk',
 	/**
