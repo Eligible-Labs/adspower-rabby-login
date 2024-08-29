@@ -21,7 +21,7 @@ const app = new App({
 	 * Количество параллельно запускаемых браузеров
 	 * 'auto' если определять автоматически по CPU
 	 */
-	concurrency: 'auto',
+	concurrency: 2,
 	/**
 	 * ID расширения Rabby в браузерe
 	 * Установка https://chromewebstore.google.com/detail/rabby-wallet/acmacodkjbdgmoleebolmdjonilkdbch
