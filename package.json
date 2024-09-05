@@ -21,6 +21,7 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
+		"@types/lodash": "^4.17.7",
 		"@types/node": "^22.5.0",
 		"nodemon": "^3.1.4",
 		"ts-node": "^10.9.2",
@@ -33,6 +34,7 @@
 		"axios": "^1.7.5",
 		"axios-rate-limit": "^1.4.0",
 		"ethers": "^6.13.2",
+		"lodash": "^4.17.21",
 		"officecrypto-tool": "^0.0.18",
 		"p-map": "^7.0.2",
 		"playwright": "^1.46.1",

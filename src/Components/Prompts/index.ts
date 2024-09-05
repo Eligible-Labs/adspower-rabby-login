@@ -5,9 +5,10 @@ import { AdsPowerApi } from '@src/Components/AdsPowerApi';
 import type { Account } from '@src/Components/Browser';
 import { InternalErrorCodes } from '@src/Constants/Errors';
 import { InternalError } from '@src/Errors/InternalError';
-import { notExisting } from '@src/Helpers/index';
+import { notExisting, sleep } from '@src/Helpers/index';
 import { logger } from '@src/Libs/Logger';
 import { xlsx } from '@src/Libs/Xlsx';
+import _ from 'lodash'
 import { Validators } from './Validators';
 
 const XLSX_FILE_HEADERS = ['accountNumber', 'privateKey', 'adsUserId'];
@@ -64,7 +65,13 @@ export class Prompts {
 
 		const adsApi = new AdsPowerApi({ baseURL: config.ads_power_api_url });
 
-		const adsProfilesFound = await adsApi.findProfiles(adsUserIds);
+		const adsProfilesFound: string[] = [];
+
+		for (const userIdsChunk of _.chunk(adsUserIds, 100)) {
+			const found = await adsApi.findProfiles(userIdsChunk);
+			adsProfilesFound.push(...found);
+			await sleep(1000 * 1);
+		}
 
 		const notFoundAdsUserIds = notExisting(adsUserIds, adsProfilesFound);
 
