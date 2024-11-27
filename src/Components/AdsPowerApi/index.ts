@@ -18,7 +18,7 @@ export class AdsPowerApi {
 
 	public async createProfile(proxy: ProxyConfig) {
 		const data: CreateProfileRequest = {
-			group_id: '4818628',
+			group_id: '0',
 			fingerprint_config: {
 				automatic_timezone: '1',
 				random_ua: {
