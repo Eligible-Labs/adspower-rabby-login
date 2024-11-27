@@ -37,7 +37,7 @@ const app = new App({
 	 * Создавать ли ADS профиль перед логином. 
 	 * При true столбец ADS ID в таблице не учитывается
 	 */
-	create_browser_before_login: true,
+	create_ads_profile_before_login: true,
 	/**
 	 * Закрывать ли браузер после логина кошелька
 	 */

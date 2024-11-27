@@ -13,7 +13,7 @@ export type AppConfig = {
 	db_proxies_file_path: string;
 	db_proxies_used_file_path: string;
 	close_browser_after_login: boolean;
-	create_browser_before_login: boolean;
+	create_ads_profile_before_login: boolean;
 	concurrency: number | 'auto';
 	rows_to_login: RowNumberSetting;
 	rows_to_ignore: RowNumberSetting;
@@ -64,7 +64,7 @@ export class App {
 				rabbyPassword: walletsPassword,
 				adsApiBaseURL: apiBottleneck.endpoint,
 				chromeExtId: this.config.chrome_extension_id,
-				createAdsProfile: this.config.create_browser_before_login,
+				createAdsProfile: this.config.create_ads_profile_before_login,
 			});
 
 			try {

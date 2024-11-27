@@ -32,7 +32,7 @@ export class Prompts {
 
 		const accounts = await this.getAndValidateFileContent(dbFilePath, dbFilePassword, config);
 
-		if (config.create_browser_before_login) {
+		if (config.create_ads_profile_before_login) {
 			const proxies = await this.getActualProxies(config);
 
 			if (!proxies.length) {
@@ -104,7 +104,7 @@ export class Prompts {
 
 		logger.info({ code: 'got_file_content', data: { headers, path } });
 
-		const { accounts, errors } = Validators.accounts(content, !config.create_browser_before_login);
+		const { accounts, errors } = Validators.accounts(content, !config.create_ads_profile_before_login);
 
 		if (errors.length > 0) {
 			throw new InternalError({ code: InternalErrorCodes.fileInvalidBody, data: { errors } });
