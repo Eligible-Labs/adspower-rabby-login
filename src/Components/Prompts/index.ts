@@ -114,7 +114,7 @@ export class Prompts {
 			throw new InternalError({ code: InternalErrorCodes.fileNoAccounts });
 		}
 
-		const adsUserIds = accounts.map(({ adsUserId }) => adsUserId);
+		const adsUserIds = accounts.map(({ adsUserId }) => adsUserId?.trim()).filter(Boolean);
 
 		const adsApi = new AdsPowerApi({ baseURL: config.ads_power_api_url });
 
