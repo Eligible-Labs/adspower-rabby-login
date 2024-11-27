@@ -5,10 +5,15 @@ import pMap from 'p-map';
 import { logger } from '@src/Libs/Logger';
 import { cpus } from 'node:os';
 import { ApiBottleneck } from './Components/ApiBottleneck';
+import { appendFile } from 'node:fs/promises';
+import { getProxyKey } from './Helpers';
 
 export type AppConfig = {
 	db_file_path: string;
+	db_proxies_file_path: string;
+	db_proxies_used_file_path: string;
 	close_browser_after_login: boolean;
+	create_browser_before_login: boolean;
 	concurrency: number | 'auto';
 	rows_to_login: RowNumberSetting;
 	rows_to_ignore: RowNumberSetting;
@@ -59,6 +64,7 @@ export class App {
 				rabbyPassword: walletsPassword,
 				adsApiBaseURL: apiBottleneck.endpoint,
 				chromeExtId: this.config.chrome_extension_id,
+				createAdsProfile: this.config.create_browser_before_login,
 			});
 
 			try {
@@ -69,6 +75,10 @@ export class App {
 				}
 			} catch (error) {
 				logger.error(error, 'account_process_error', { user_id: account.adsUserId });
+			} finally {
+				if (account.proxy) {
+					await appendFile(this.config.db_proxies_used_file_path, `${getProxyKey(account.proxy)}\n`)
+				}
 			}
 		};
 

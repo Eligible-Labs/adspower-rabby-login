@@ -5,11 +5,13 @@ import { AdsPowerApi } from '@src/Components/AdsPowerApi';
 import type { Account } from '@src/Components/Browser';
 import { InternalErrorCodes } from '@src/Constants/Errors';
 import { InternalError } from '@src/Errors/InternalError';
-import { notExisting, sleep } from '@src/Helpers/index';
+import { getProxyKey, notExisting, sleep } from '@src/Helpers/index';
 import { logger } from '@src/Libs/Logger';
 import { xlsx } from '@src/Libs/Xlsx';
 import _ from 'lodash'
 import { Validators } from './Validators';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 const XLSX_FILE_HEADERS = ['accountNumber', 'privateKey', 'adsUserId'];
 
@@ -29,6 +31,22 @@ export class Prompts {
 		});
 
 		const accounts = await this.getAndValidateFileContent(dbFilePath, dbFilePassword, config);
+
+		if (config.create_browser_before_login) {
+			const proxies = await this.getActualProxies(config);
+
+			if (!proxies.length) {
+				throw new InternalError({ code: InternalErrorCodes.proxyNotFound });
+			}
+
+			if (proxies.length < accounts.length) {
+				throw new InternalError({ code: InternalErrorCodes.proxyNotEnough });
+			}
+
+			for (const account of accounts) {
+				account.proxy = proxies.pop();
+			}
+		}
 
 		const walletsPassword = await password({
 			message: 'Пароль, будет задан для всех Rabby wallet',
@@ -79,8 +97,6 @@ export class Prompts {
 		return true;
 	}
 
-
-
 	private async getAndValidateFileContent(path: string, password: string, config: AppConfig) {
 		const content = await xlsx.getContent<Account>(path, password, { headers: XLSX_FILE_HEADERS });
 
@@ -88,7 +104,7 @@ export class Prompts {
 
 		logger.info({ code: 'got_file_content', data: { headers, path } });
 
-		const { accounts, errors } = Validators.accounts(content);
+		const { accounts, errors } = Validators.accounts(content, !config.create_browser_before_login);
 
 		if (errors.length > 0) {
 			throw new InternalError({ code: InternalErrorCodes.fileInvalidBody, data: { errors } });
@@ -140,5 +156,38 @@ export class Prompts {
 		logger.info({ code: 'got_file_rows', message: `Строки для логина: ${resultRowNumbers}` });
 
 		return resultAccounts;
+	}
+
+	private async loadProxies(filePath: string) {
+		const proxies = (await readFile(filePath))
+			.toString('utf-8')
+			.split('\n')
+			.map((line) => {
+				const [ip, port, user, password] = line.trim().split(':');
+				return {
+					host: ip,
+					port: port,
+					user,
+					password,
+				};
+			})
+			.filter(({ host, port, user, password }) => host && port && user && password);
+
+		return proxies;
+	}
+
+	private async loadUsedProxyKeys(filePath: string) {
+		const usedProxies = await this.loadProxies(filePath)
+
+		return new Set(usedProxies.map((proxy) => getProxyKey(proxy)));
+	}
+
+	private async getActualProxies(config: AppConfig) {
+		const usedProxies = await this.loadUsedProxyKeys(config.db_proxies_used_file_path);
+		const allProxies = await this.loadProxies(config.db_proxies_file_path);
+
+		const notUsedProxies = allProxies.filter(proxy => !usedProxies.has(getProxyKey(proxy)))
+
+		return notUsedProxies;
 	}
 }

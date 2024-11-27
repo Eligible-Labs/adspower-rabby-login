@@ -1,16 +1,18 @@
 import { type BrowserContext, type Page, chromium } from 'playwright';
 import { AdsPowerApi } from '@src/Components/AdsPowerApi';
 import { InternalError } from '@src/Errors/InternalError';
-import { sleep } from '@src/Helpers/index';
+import { ProxyConfig, sleep } from '@src/Helpers/index';
 import { logger } from '@src/Libs/Logger';
 
 export type Account = {
 	accountNumber: number;
 	privateKey: string;
 	adsUserId: string;
+	proxy?: ProxyConfig;
 };
 
 type BrowserConfig = Account & {
+	createAdsProfile: boolean;
 	adsApiBaseURL: string;
 	rabbyPassword: string;
 	chromeExtId: string;
@@ -139,10 +141,31 @@ export class Browser {
 		await this.clickIfVisible(page, this.getDocumentSelectorWitInnerText(selector, text));
 	}
 
+	private async getCdpSessionURL() {
+		if (this.config.createAdsProfile) {
+			if (!this.config.proxy) {
+				throw new InternalError({ code: 'account_process_no_proxy', data: this.logData });
+			}
+
+			const userId = await this.adsApi.createProfile(this.config.proxy);
+
+			this.config.adsUserId = userId;
+
+			const cdpSessionURL = await this.adsApi.startProfile(userId);
+
+			return cdpSessionURL;
+		}
+
+		const cdpSessionURL = await this.adsApi.startProfile(this.config.adsUserId);
+
+		return cdpSessionURL;
+
+	}
+
 	public async process() {
 		logger.info({ code: 'account_process_started', data: this.logData });
 
-		const cdpSessionURL = await this.adsApi.startProfile(this.config.adsUserId);
+		const cdpSessionURL = await this.getCdpSessionURL()
 
 		const browser = await chromium.connectOverCDP(cdpSessionURL);
 		this.browser = browser.contexts()[0];

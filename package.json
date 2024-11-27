@@ -11,7 +11,7 @@
 		"postinstall": "npx playwright install --with-deps chromium",
 		"types-check": "npx tsc -p ./ --noEmit",
 		"lint": "npm run lint:ci --write",
-		"lint:ci": "npx biome check ./",
+		"lint:ci": "npx biome check ./src",
 		"build": "npx vite build",
 		"start": "npm run types-check && npm run build && node dist",
 		"dev": "npx nodemon"

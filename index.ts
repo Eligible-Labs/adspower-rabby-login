@@ -8,6 +8,15 @@ const app = new App({
 	 */
 	db_file_path: './docs/db-example.xlsx',
 	/**
+	 * Путь до файла с прокси, 
+	 * Прокси используются при создании профилей ADS софтом (create_browser_before_login: true)
+	 */
+	db_proxies_file_path: './docs/proxies.txt',
+	/**
+	 * Путь до файла с использованными прокси
+	 */
+	db_proxies_used_file_path: './docs/proxies_used.txt',
+	/**
 	 * Номер строки для логина
 	 * 'all' - Все числа подходят
 	 * 10 - Подходят только числа равные 10 
@@ -24,6 +33,11 @@ const app = new App({
 	 * [[0, 15], [20, 25], [50, 100]] - Не подходят только числа от 0 до 10, от 20 до 25 и от 50 до 100
 	 */
 	rows_to_ignore: 0,
+	/**
+	 * Создавать ли ADS профиль перед логином. 
+	 * При true столбец ADS ID в таблице не учитывается
+	 */
+	create_browser_before_login: true,
 	/**
 	 * Закрывать ли браузер после логина кошелька
 	 */

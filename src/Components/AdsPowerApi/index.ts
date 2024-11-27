@@ -1,9 +1,9 @@
 import type { AxiosInstance } from 'axios';
-import rateLimit from 'axios-rate-limit';
 import axios from 'axios';
 import { InternalError } from '@src/Errors/InternalError';
 import { logger } from '@src/Libs/Logger';
-import type { FindProfilesRequest, FindProfilesResponse, StartProfileRequest, StartProfileResponse } from './types';
+import type { CreateProfileRequest, CreateProfileResponse, FindProfilesRequest, FindProfilesResponse, StartProfileRequest, StartProfileResponse } from './types';
+import { ProxyConfig } from '@src/Helpers';
 
 type AdsPowerConfig = {
 	baseURL: string;
@@ -13,7 +13,45 @@ export class AdsPowerApi {
 	private readonly api: AxiosInstance;
 
 	constructor(config: AdsPowerConfig) {
-		this.api = rateLimit(axios.create(config), { maxRPS: 1 });
+		this.api = axios.create(config);
+	}
+
+	public async createProfile(proxy: ProxyConfig) {
+		const data: CreateProfileRequest = {
+			group_id: '4818628',
+			fingerprint_config: {
+				automatic_timezone: '1',
+				random_ua: {
+					ua_system_version: ['Windows 10', 'Windows 11'],
+				},
+				webrtc: 'forward',
+			},
+			user_proxy_config: {
+				proxy_soft: 'other',
+				proxy_type: 'http',
+				proxy_host: proxy.host,
+				proxy_port: proxy.port,
+				proxy_user: proxy.user,
+				proxy_password: proxy.password,
+			},
+		};
+
+		const logData: Record<string, unknown> = { params: data };
+
+		logger.info({ code: 'ads_power_api_create_profile_request', data: logData });
+
+		const { data: response } = await this.api.post<CreateProfileResponse>('/api/v1/user/create', data);
+
+		logData.response = response;
+
+		logger.info({ code: 'ads_power_api_create_profile_response', data: logData });
+
+		if (response.code !== 0 || !response.data)
+			throw new InternalError({ message: 'Ads Power profile create error', data: logData });
+
+		logger.info({ code: 'ads_power_api_create_profile_done', data: logData });
+
+		return response.data.id;
 	}
 
 	public async startProfile(userId: string) {

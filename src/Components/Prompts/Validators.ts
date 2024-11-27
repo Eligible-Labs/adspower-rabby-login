@@ -20,7 +20,7 @@ export class Validators {
 		return isValid || 'Неверный пароль';
 	}
 
-	public static accounts(accountsInput: Account[]): { accounts: Account[]; errors: AccountError[] } {
+	public static accounts(accountsInput: Account[], isAdsIdRequired: boolean): { accounts: Account[]; errors: AccountError[] } {
 		const errors: AccountError[] = [];
 
 		const adsUserIds = new Set<string>();
@@ -35,7 +35,7 @@ export class Validators {
 				const privateKey = account.privateKey ? String(account.privateKey).trim() : null;
 				const adsUserId = account.adsUserId ? String(account.adsUserId).trim() : null;
 
-				if (!(privateKey || adsUserId || accountNumber)) {
+				if (!privateKey || (!adsUserId && isAdsIdRequired) || !accountNumber) {
 					return null;
 				}
 
@@ -57,14 +57,16 @@ export class Validators {
 					privateKeys.add(privateKey);
 				}
 
-				if (!adsUserId) {
-					rowErrors.push('Отсутствует ADS id');
-				} else if (adsUserId.length < 5) {
-					rowErrors.push('Некорректный ADS id');
-				} else if (adsUserIds.has(adsUserId)) {
-					rowErrors.push('Дубликат ADS id');
-				} else {
-					adsUserIds.add(adsUserId);
+				if (isAdsIdRequired) {
+					if (!adsUserId) {
+						rowErrors.push('Отсутствует ADS id');
+					} else if (adsUserId.length < 5) {
+						rowErrors.push('Некорректный ADS id');
+					} else if (adsUserIds.has(adsUserId)) {
+						rowErrors.push('Дубликат ADS id');
+					} else {
+						adsUserIds.add(adsUserId);
+					}
 				}
 
 				if (rowErrors.length > 0) {
