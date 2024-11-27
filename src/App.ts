@@ -4,8 +4,7 @@ import { InternalError } from '@src/Errors/InternalError';
 import pMap from 'p-map';
 import { logger } from '@src/Libs/Logger';
 import { cpus } from 'node:os';
-
-
+import { ApiBottleneck } from './Components/ApiBottleneck';
 
 export type AppConfig = {
 	db_file_path: string;
@@ -16,9 +15,6 @@ export type AppConfig = {
 	ads_power_api_url: string;
 	chrome_extension_id: string;
 };
-
-
-
 
 export class App {
 	private readonly config: AppConfig;
@@ -53,11 +49,15 @@ export class App {
 	private async processAccounts(accounts: Account[], walletsPassword: string) {
 		const concurrency = this.config.concurrency === 'auto' ? cpus().length : this.config.concurrency;
 
+		const apiBottleneck = new ApiBottleneck(this.config.ads_power_api_url);
+
+		await apiBottleneck.initServer();
+
 		const mapper = async (account: Account) => {
 			const browser = new Browser({
 				...account,
 				rabbyPassword: walletsPassword,
-				adsApiBaseURL: this.config.ads_power_api_url,
+				adsApiBaseURL: apiBottleneck.endpoint,
 				chromeExtId: this.config.chrome_extension_id,
 			});
 
