@@ -13,6 +13,8 @@ import { Validators } from './Validators';
 
 const XLSX_FILE_HEADERS = ['accountNumber', 'privateKey', 'adsUserId'];
 
+export type RowNumberSetting = number[] | 'all' | number | [number, number][]
+
 export class Prompts {
 	public async getInputsForStart(config: AppConfig) {
 		const dbFilePath = await input({
@@ -43,6 +45,41 @@ export class Prompts {
 			walletsPassword,
 		};
 	}
+
+	private checkRowAllowed(setting: RowNumberSetting, row: number): boolean {
+		if (setting === 'all') {
+			return true;
+		} else if (typeof setting === 'number') {
+			return row === setting;
+		} else if (Array.isArray(setting)) {
+			if (setting.length > 0 && Array.isArray(setting[0])) {
+				return (setting as [number, number][]).some(([start, end]) => row >= start && row <= end);
+			} else {
+				return (setting as number[]).includes(row);
+			}
+		}
+
+		return false;
+	}
+
+
+	private checkRowNotIgnored(setting: RowNumberSetting, row: number): boolean {
+		if (setting === 'all') {
+			return false;
+		} else if (typeof setting === 'number') {
+			return row !== setting;
+		} else if (Array.isArray(setting)) {
+			if (setting.length > 0 && Array.isArray(setting[0])) {
+				return !(setting as [number, number][]).some(([start, end]) => row >= start && row <= end);
+			} else {
+				return !(setting as number[]).includes(row);
+			}
+		}
+
+		return true;
+	}
+
+
 
 	private async getAndValidateFileContent(path: string, password: string, config: AppConfig) {
 		const content = await xlsx.getContent<Account>(path, password, { headers: XLSX_FILE_HEADERS });
@@ -79,22 +116,29 @@ export class Prompts {
 			throw new InternalError({ code: InternalErrorCodes.fileAdsNotFound, data: { errors: notFoundAdsUserIds } });
 		}
 
-		if (config.accounts_to_login === 'all') {
-			return accounts;
-		}
+		const { rows_to_ignore, rows_to_login } = config;
 
-		const accountNumbersToFind = config.accounts_to_login as number[];
-		const foundAccounts = accounts.filter(({ accountNumber }) => accountNumbersToFind.includes(accountNumber));
-		const foundAccountNumbers = foundAccounts.map(({ accountNumber }) => accountNumber);
-		const notFoundAccountNumbers = notExisting(accountNumbersToFind, foundAccountNumbers)
+		const resultRowNumbers: number[] = []
 
-		if (notFoundAccountNumbers.length > 0) {
+		const resultAccounts = accounts.filter((_, index) => {
+			const rowNumber = index + 2;
+
+			if (this.checkRowAllowed(rows_to_login, rowNumber) && this.checkRowNotIgnored(rows_to_ignore, rowNumber)) {
+				resultRowNumbers.push(rowNumber);
+				return true;
+			}
+
+			return false;
+		});
+
+		if (!resultAccounts.length) {
 			throw new InternalError({
-				code: InternalErrorCodes.fileAccountNotFound,
-				data: { errors: notFoundAccountNumbers },
+				code: InternalErrorCodes.fileNoAccounts,
 			});
 		}
 
-		return foundAccounts;
+		logger.info({ code: 'got_file_rows', message: `Строки для логина: ${resultRowNumbers}` });
+
+		return resultAccounts;
 	}
 }

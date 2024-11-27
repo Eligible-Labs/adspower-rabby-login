@@ -1,18 +1,24 @@
 import { type Account, Browser } from '@src/Components/Browser';
-import { Prompts } from '@src/Components/Prompts';
+import { Prompts, RowNumberSetting } from '@src/Components/Prompts';
 import { InternalError } from '@src/Errors/InternalError';
 import pMap from 'p-map';
 import { logger } from '@src/Libs/Logger';
 import { cpus } from 'node:os';
 
+
+
 export type AppConfig = {
 	db_file_path: string;
 	close_browser_after_login: boolean;
 	concurrency: number | 'auto';
-	accounts_to_login: number[] | 'all';
+	rows_to_login: RowNumberSetting;
+	rows_to_ignore: RowNumberSetting;
 	ads_power_api_url: string;
 	chrome_extension_id: string;
 };
+
+
+
 
 export class App {
 	private readonly config: AppConfig;
